@@ -1,14 +1,11 @@
 public class Stone extends Resource{
     Stone(){
         super("stone");
-        super.setQuantity(200);
-        this.isCritical = false;
+        super.add(1);
     }
 
     Stone(int amount){
         super("stone");
-        super.setQuantity(amount);
-        this.isCritical = false;
-        
+        super.add(amount);
     }
 }

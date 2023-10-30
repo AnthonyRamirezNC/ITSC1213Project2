@@ -7,9 +7,11 @@ import java.util.Random;
  */
 public class TextManagementGame {
     // Define game variables
-    private int round;
+    public static int round;
     private ArrayList<Resource> resources = new ArrayList<Resource>();
     private ArrayList<Generator> generators = new ArrayList<Generator>();
+
+    public static boolean revivable = false;
 
     // Define a Scanner for user input
     private Scanner scanner = new Scanner(System.in);
@@ -20,6 +22,7 @@ public class TextManagementGame {
      */
     public TextManagementGame() {
         round = 1;       // Start at time 1
+        revivable = false;  //set non revivable by default
     }
 
     /**
@@ -100,28 +103,35 @@ public class TextManagementGame {
     }
 
     /**
+     * Checks if we can revive
+     */
+    public boolean isRevivable() {
+        return revivable;
+    }
+
+    /**
      * Starts the game and manages the game loop.
      */
     public void start() {
         System.out.println("Welcome to the Text Management Game!"); //TODO: Change Text
-        System.out.println("Your goal is to build a thriving city! You will start with 200");
-
+        System.out.println("Your goal is to build a thriving city! You will start with 200 gold, when you run out of gold, you lose");
+        resources.add(new Gold());
         int oddsOfRandomEvent = 4; //a 4 is a 25% chance of a random event occuring
 
         // Main game loop
-        while (!isCriticalResourceEmpty()) {
+        while (!isCriticalResourceEmpty() && !isRevivable()) {
             System.out.println("\nTime " + round);
             if(haveEventThisTurn(oddsOfRandomEvent)){
                 //TODO add logic for random events
                 System.out.println("A random event happened!");
             }
             System.out.println("Options:");
-            System.out.println("1. Collect resources");
-            System.out.println("2. Manage resources");
+            System.out.println("1. View Current Resources");
+            System.out.println("2. View Current Generators");
             System.out.println("3. Add a new Generator");
-            System.out.println("4. End round");
-            System.out.println("5. Quit game");
-            System.out.print("Choose an option: ");
+            System.out.println("4. End Round");
+            System.out.println("5. Quit Game");
+            System.out.print("Choose an Option: ");
             int choice = scanner.nextInt();
 
             switch (choice) {
@@ -131,7 +141,8 @@ public class TextManagementGame {
                 case 2:
                     viewGenerators();
                     break;
-                case 3: 
+                case 3:
+                    //add logic to select which generator to make
                     constructGenerator();
                     break;
                 case 4:
@@ -150,6 +161,56 @@ public class TextManagementGame {
     }
 
     /**
+     *Gets user input on generator construction
+     */
+    public void GenCreateMenu(){
+        System.out.println("Which Generator would you like to craft?");
+        System.out.println("1. Mine");
+        System.out.println("2. Village");
+        System.out.println("3. Lumberjacks");
+        int choice = scanner.nextInt();
+        boolean canCraft = false;
+                switch(choice){
+            case 1:
+                //check if construction costs are met
+                canCraft = Helper.canConstruct(Mine.contructionCost, resources);
+                if(canCraft){
+                    System.out.println("You have created a Mine!");
+                }
+                else{
+                    System.out.println("You do not have enough resources to create a Mine!");
+                }
+                break;
+
+            case 2:
+                //check if construction costs are met
+                canCraft = Helper.canConstruct(Village.contructionCost, resources);
+                if(canCraft){
+                    System.out.println("You have created a Village!");
+                }
+                else{
+                    System.out.println("You do not have enough resources to create a Village!");
+                }
+                break;
+
+            case 3:
+                //check if construction costs are met
+                canCraft = Helper.canConstruct(Lumberjacks.contructionCost, resources);
+                if(canCraft){
+                    System.out.println("You have hired Lumberjacks!");
+                }
+                else{
+                    System.out.println("You do not have enough resources to hire Lumberjacks!");
+                }
+                break;
+
+
+        }
+
+
+    }
+
+    /**
      * Main method to run the game
      *
      * @param args the command-line arguments (not used in this game)
@@ -158,4 +219,6 @@ public class TextManagementGame {
         TextManagementGame game = new TextManagementGame();
         game.start();
     }
+
+
 }
