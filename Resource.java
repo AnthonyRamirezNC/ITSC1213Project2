@@ -48,7 +48,7 @@ public class Resource {
     /**
      * Sets if a given resource is critical.
      * 
-     * @param boolean value for isCritical
+     * @param isCritical value for isCritical
      */
     public void setIsCrticial(boolean isCritical){
         this.isCritical = isCritical;
@@ -75,5 +75,9 @@ public class Resource {
             quantity = 0;
             System.out.println("Not enough " + name + " to consume.");
         }
+    }
+
+    public String toString(){
+        return name + " : " + quantity;
     }
 }

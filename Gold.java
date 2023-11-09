@@ -1,7 +1,7 @@
 public class Gold extends Resource{
     Gold(){
         super("gold");
-        super.add(200);
+        super.add(500);
         super.setIsCrticial(true);
     }
 
