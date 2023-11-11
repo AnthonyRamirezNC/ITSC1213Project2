@@ -2,7 +2,7 @@
  * The Resource class represents a generic resource in the game.
  * Resources have a name, a quantity, and a status of critical or not critical.
  */
-public class Resource {
+public abstract class Resource {
     private String name;
     private int quantity;
     private boolean isCritical;
@@ -79,5 +79,9 @@ public class Resource {
 
     public String toString(){
         return name + " : " + quantity;
+    }
+
+    public int scoreImpact(){
+        return 0;
     }
 }

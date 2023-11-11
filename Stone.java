@@ -8,4 +8,9 @@ public class Stone extends Resource{
         super("stone");
         super.add(amount);
     }
+
+    @Override
+    public int scoreImpact(){
+        return getQuantity();
+    }
 }

@@ -12,5 +12,8 @@ public class Gold extends Resource{
         
     }
 
-
+    @Override
+    public int scoreImpact(){
+        return 3 * getQuantity();
+    }
 }

@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 /**
  * The TextManagementGame class represents a text-based management game where the player manages resources and resource generators.
@@ -9,8 +6,10 @@ import java.util.Random;
 public class TextManagementGame {
     // Define game variables
     public static int round;
-    private ArrayList<Resource> resources = new ArrayList<Resource>(Arrays.asList(new Gold(0), new Wood(100), new Stone(100)));
+    private ArrayList<Resource> resources = new ArrayList<Resource>(Arrays.asList(new Gold(0), new Wood(0), new Stone(0)));
     private ArrayList<Generator> generators = new ArrayList<Generator>();
+
+    private ArrayList<Event> events = new ArrayList<Event>(Arrays.asList(new StrikeEvent(), new DestroyGeneratorEvent(), new MisplacedResourcesEvent()));
 
     public int oddsOfRandomEvent = 4; //ex: 0 = disable events, 1 = always have events, 4 = 25% chance
 
@@ -60,6 +59,7 @@ public class TextManagementGame {
     */
     public void viewGenerators(){
         System.out.println("Current Generators:");
+        Collections.sort(generators);
         for(Generator b : generators){
             System.out.println(b + "\n");
         }
@@ -81,12 +81,16 @@ public class TextManagementGame {
         if(oddsOfRandomEvent > 0) {
             if (haveEventThisTurn(oddsOfRandomEvent)) {
                 //TODO add logic for random events
-                System.out.println("A random event happened!");
+                int eventChoice = (int) (Math.random() * events.size());
+                events.get(eventChoice).triggerEvent(this);
             }
         }
         if(ableToCollect) {
             Helper.collectGeneratorResources(resources, generators);
-        } else {System.out.println("You were unable to collect resources this round");}
+        } else {
+            System.out.println("You were unable to collect resources this round your citizens are on strike");
+            ableToCollect = true;
+        }
         round++;
     }
 
@@ -172,6 +176,7 @@ public class TextManagementGame {
                 case 5:
                     //sell resources menu
                     resourceSellMenu();
+                    break;
                 case 6:
                     //check for village in generators
                     for(Generator generator : generators){
@@ -193,9 +198,11 @@ public class TextManagementGame {
                     System.out.println("Game Over!");
                     if(round == 1){
                         System.out.println("You played for 1 round");
+                        Helper.generateScore(this);
                         System.exit(0);
                     }else {
                         System.out.println("You played for " + round + " rounds");
+                        Helper.generateScore(this);
                         System.exit(0);
                     }
                     break;
@@ -220,6 +227,7 @@ public class TextManagementGame {
 
         System.out.println("Game Over! You ran out of resources.");
         System.out.println("You played for " + round + " rounds");
+        Helper.generateScore(this);
     }
 
     /**
@@ -228,13 +236,16 @@ public class TextManagementGame {
     public void GenCreateMenu(){
         System.out.println("Which Generator would you like to craft?");
         System.out.println("1. Mine");
+        System.out.println(Mine.description);
         System.out.println("2. Village");
+        System.out.println(Village.description);
         System.out.println("3. Lumberjacks");
+        System.out.println(Lumberjacks.description);
         int choice = scanner.nextInt();
         boolean canCraft = false;
                 switch(choice){
             case 1:
-                System.out.println("This will require the following Resources:");
+                System.out.println("This requires the following Resources:");
                 for(Resource resource : Mine.contructionCost){
                     System.out.println(resource.getName()+ ": " + resource.getQuantity());
                 }
@@ -262,7 +273,7 @@ public class TextManagementGame {
                 break;
 
             case 2:
-                System.out.println("This will require the following Resources:");
+                System.out.println("This requires the following Resources:");
                 for(Resource resource : Village.contructionCost){
                     System.out.println(resource.getName()+ ": " + resource.getQuantity());
                 }
@@ -290,7 +301,7 @@ public class TextManagementGame {
                 break;
 
             case 3:
-                System.out.println("This will require the following Resources:");
+                System.out.println("This requires the following Resources:");
                 for(Resource resource : Lumberjacks.contructionCost){
                     System.out.println(resource.getName()+ ": " + resource.getQuantity());
                 }
@@ -322,30 +333,36 @@ public class TextManagementGame {
      *Gets user input on generator upgrade
      */
     public void genUpgradeMenu(){
+        if(generators.size() == 0){
+            System.out.println("No generators to upgrade");
+            return;
+        }
         System.out.println("Current Generators:");
         for(int i = 0; i < generators.size(); i++){
             System.out.println((i+1) + ".) " + generators.get(i).toString());
         }
         System.out.println("Which generators would you like to upgrade?");
         int choice = scanner.nextInt();
-        ArrayList<Resource> upgradeCost = generators.get(choice - 1).getUpgradeCost();
-        if(upgradeCost.size() > 0){
-            System.out.println("This will require the following Resources:");
-            for(Resource resource : upgradeCost){
-                System.out.println(resource.getName()+ ": " + resource.getQuantity());
-            }
-            System.out.println("\nYou have the following resources:");
-            viewResources();
+        if(choice <= generators.size()){
+            ArrayList<Resource> upgradeCost = generators.get(choice - 1).getUpgradeCost();
+            if(upgradeCost.size() > 0){
+                System.out.println("This requires the following Resources:");
+                for(Resource resource : upgradeCost){
+                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
+                }
+                System.out.println("\nYou have the following resources:");
+                viewResources();
 
-            System.out.println("Would you like to continue? (Y or N)");
-            //flush buffer
-            scanner.nextLine();
-            String doContinue = scanner.nextLine();
-            if(doContinue.toLowerCase().equals("y")){
-                System.out.println("upgrading generator");
-                generators.get(choice - 1).upgrade(resources);
-            } else System.out.println("Generator not upgraded");
-        }
+                System.out.println("Would you like to continue? (Y or N)");
+                //flush buffer
+                scanner.nextLine();
+                String doContinue = scanner.nextLine();
+                if(doContinue.toLowerCase().equals("y")){
+                    System.out.println("upgrading generator");
+                    generators.get(choice - 1).upgrade(resources);
+                } else System.out.println("Generator not upgraded");
+            }
+        }else System.out.println("Invalid Choice");
     }
 
     /**
@@ -362,26 +379,31 @@ public class TextManagementGame {
         System.out.println("How much do you want to sell?");
         int sellAmount = scanner.nextInt();
         if(choice == 1){
-            goldToAdd = sellAmount * 10;
-            resources.get(0).add(goldToAdd);
-            resources.get(choice).consume(sellAmount);
-            System.out.println("You sold " + sellAmount + " Wood for " + goldToAdd + " gold.");
+            if(sellAmount <= resources.get(1).getQuantity()) {
+                goldToAdd = sellAmount * 10;
+                resources.get(0).add(goldToAdd);
+                resources.get(choice).consume(sellAmount);
+                System.out.println("You sold " + sellAmount + " Wood for " + goldToAdd + " gold.");
+            }else System.out.println("Not enough resources to sell");
+
         }else if(choice ==2){
-            goldToAdd = sellAmount * 20;
-            resources.get(0).add(goldToAdd);
-            resources.get(choice).consume(sellAmount);
-            System.out.println("You sold " + sellAmount + " Stone for " + goldToAdd + " gold.");
+            if(sellAmount <= resources.get(2).getQuantity()) {
+                goldToAdd = sellAmount * 20;
+                resources.get(0).add(goldToAdd);
+                resources.get(choice).consume(sellAmount);
+                System.out.println("You sold " + sellAmount + " Stone for " + goldToAdd + " gold.");
+            }else System.out.println("Not enough resources to sell");
         }else System.out.println("Invalid Choice");
     }
 
     /**
-     * Open cheat menu ONLY AVAILABLE AFTER ROUND 25
+     * Open cheat menu ONLY AVAILABLE AFTER ROUND 15
      */
     public void cheatMenu(){
         System.out.println("\nopening cheat menu");
         System.out.println("Round: " + round);
         while(breakout != true){
-            if (round >= 3) {
+            if (round >= 15) {
                 System.out.println("Welcome to the cheat menu, what would you like to do?");
                 System.out.println("1. Change Round");
                 System.out.println("2. Add Resources");
@@ -414,12 +436,14 @@ public class TextManagementGame {
                         viewResources();
                         break;
                     case 3:
-                        System.out.println("Current Generators");
                         viewGenerators();
                         System.out.println("Which Generator would you like to spawn?");
                         System.out.println("1.) Mine");
+                        System.out.println(Mine.description);
                         System.out.println("2.) Village");
+                        System.out.println(Village.description);
                         System.out.println("3.) Lumberjacks");
+                        System.out.println(Lumberjacks.description);
                         int genChoice = scanner.nextInt();
                         switch(genChoice){
                             case 1:
@@ -447,9 +471,13 @@ public class TextManagementGame {
                         }
                         System.out.println("Which generators would you like to upgrade?");
                         int genUpgradeChoice = scanner.nextInt();
-                        //upgrade using arraylist with infinite resources
-                        generators.get(genUpgradeChoice - 1).upgrade(new ArrayList<Resource>(Arrays.asList(new Gold(999999), new Stone(999999), new Wood(999999))));
-                        System.out.println(generators.get(genUpgradeChoice - 1).getName() + " upgraded to level " + generators.get(genUpgradeChoice - 1).getCurrentLevel());
+                        if(genUpgradeChoice <= generators.size()) {
+                            //upgrade using arraylist with infinite resources
+                            generators.get(genUpgradeChoice - 1).upgrade(new ArrayList<Resource>(Arrays.asList(new Gold(999999), new Stone(999999), new Wood(999999))));
+                            if(generators.get(genUpgradeChoice - 1).currentLevel <3) {
+                                System.out.println(generators.get(genUpgradeChoice - 1).getName() + " upgraded to level " + generators.get(genUpgradeChoice - 1).getCurrentLevel());
+                            }
+                        }else System.out.println("Invalid Choice");
                         break;
                     case 5:
                         System.out.println("Current event chance: " + oddsOfRandomEvent + " (ex: 0 = disable events, 1 = always have events, 4 = 25% chance)");
@@ -459,7 +487,7 @@ public class TextManagementGame {
                     case 6:
                         if(!isRevivable()){
                             revivable = true;
-                            System.out.println("Activated Revive for 1 death (must be reactivated after death)");
+                            System.out.println("Activated Revive for 1 death (must be reactivated after death and must have a village)");
                         }else System.out.println("Already revivable");
                         break;
                     case 7:
@@ -470,7 +498,7 @@ public class TextManagementGame {
                 }
             }
             else {
-                System.out.println("Cheat Menu unlocks at round 25");
+                System.out.println("Cheat Menu unlocks at round 15");
                 breakout = true;
             }
         }

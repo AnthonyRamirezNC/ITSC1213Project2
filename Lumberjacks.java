@@ -10,6 +10,8 @@ public class Lumberjacks extends Generator{
 
     public static ArrayList<Resource> levelThreeContructionCost = new ArrayList<Resource>(Arrays.asList(new Gold(500), new Wood(300), new Stone(300)));
 
+    public static String description = "The Lumberjacks generates wood every round";
+
 
     /**
      * Creates a new Generator with the given name, construction cost, and resource production rate.
@@ -38,7 +40,7 @@ public class Lumberjacks extends Generator{
                 this.setResourceProductionRate(200);
             } else System.out.println("Not enough resources to upgrade");
         }
-        else System.out.println("Generator at max level");
+        else System.out.println("no more upgrades can be done");
     }
 
     @Override
@@ -50,5 +52,10 @@ public class Lumberjacks extends Generator{
             return levelTwoContructionCost;
         }
         else return levelThreeContructionCost;
+    }
+
+    @Override
+    public void printDescription(){
+        System.out.println(description);
     }
 }

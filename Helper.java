@@ -53,14 +53,14 @@ public class Helper {
         for(Generator generator : generators){
             int amountProduced = generator.getResourceProductionRate();
             if(generator instanceof Mine){
-                System.out.println("Collected " + amountProduced + " " + generator.getProduct().getName() + " from " + generator.getName());
                 currentResources.get(2).add(amountProduced);
+                System.out.println("Collected " + amountProduced + " " + generator.getProduct().getName() + " from " + generator.getName());
             }else if(generator instanceof Village){
-                System.out.println("Collected " + amountProduced + " " + generator.getProduct().getName() + " from " + generator.getName());
                 currentResources.get(0).add(amountProduced);
-            }else if(generator instanceof Lumberjacks){
                 System.out.println("Collected " + amountProduced + " " + generator.getProduct().getName() + " from " + generator.getName());
+            }else if(generator instanceof Lumberjacks){
                 currentResources.get(1).add(amountProduced);
+                System.out.println("Collected " + amountProduced + " " + generator.getProduct().getName() + " from " + generator.getName());
             }
         }
     }
@@ -68,13 +68,19 @@ public class Helper {
     public static void generateScore(TextManagementGame textManagementGame){
         int score = 0;
         int roundScore = TextManagementGame.round * 100;
-        int generatorScore = textManagementGame.getGenerators().size() * 500;
+        //calculate generator score
+        int generatorScore = 0;
+        for(Generator generator : textManagementGame.getGenerators()){
+            generatorScore += generator.scoreImpact();
+        }
         //calculate gold score
-        int goldScore = textManagementGame.getResources().get(0).getQuantity() * 3;
+        int goldScore = textManagementGame.getResources().get(0).scoreImpact();
         //calculate wood score
-        int woodScore = textManagementGame.getResources().get(1).getQuantity() * 2;
+        int woodScore = textManagementGame.getResources().get(1).scoreImpact();
         //calculate stone score
-        int stoneScore = textManagementGame.getResources().get(2).getQuantity() * 1;
+        int stoneScore = textManagementGame.getResources().get(2).scoreImpact();
+        //calculate event score
+        int eventScore = Event.eventCount * 200;
 
         System.out.println("Final Score Breakdown");
         System.out.println("Rounds Survived: +" + roundScore + " points");
@@ -82,6 +88,7 @@ public class Helper {
         System.out.println("Gold Gained: +" + goldScore + " points");
         System.out.println("Wood Gained: +" + woodScore + " points");
         System.out.println("Stone Gained: +" + stoneScore + " points");
-
+        System.out.println("Events Survived: " + eventScore + "points");
+        System.out.println("Final Score: " + (roundScore + generatorScore + goldScore + woodScore + stoneScore) + " points");
     }
 }

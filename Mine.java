@@ -6,9 +6,11 @@ public class Mine extends Generator{
 
     public static ArrayList<Resource> levelThreeContructionCost = new ArrayList<Resource>(Arrays.asList(new Gold(500), new Stone(500), new Wood(500)));
 
+    public static String description = "The Mine generates stone every round";
+
 
     Mine(){
-        super("mine", contructionCost, levelTwoContructionCost, levelThreeContructionCost, 5, 1, new Stone(1), 1);
+        super("mine", contructionCost, levelTwoContructionCost, levelThreeContructionCost, 50, 1, new Stone(1), 1);
     }
 
     @Override
@@ -20,9 +22,7 @@ public class Mine extends Generator{
             if(canUpgrade) {
                 //consume resources and upgrade level and corresponding values
                 Helper.consumeConstructionCosts(levelTwoContructionCost, currentResources);
-                System.out.println("Gen Level " + this.currentLevel);
                 this.currentLevel = 2;
-                System.out.println("Gen Level " + this.currentLevel);
                 this.setResourceProductionRate(100);
             } else System.out.println("Not enough resources to upgrade");
         }
@@ -34,7 +34,7 @@ public class Mine extends Generator{
                 this.setResourceProductionRate(200);
             } else System.out.println("Not enough resources to upgrade");
         }
-        else System.out.println("Generator at max level");
+        else System.out.println("no more upgrades can be done");
     }
 
     @Override
@@ -51,5 +51,10 @@ public class Mine extends Generator{
     @Override
     public String toString(){
         return this.getName() + " lvl " + this.getCurrentLevel() + "\nProduction Rate: " + this.getResourceProductionRate();
+    }
+
+    @Override
+    public void printDescription(){
+        System.out.println(description);
     }
 }

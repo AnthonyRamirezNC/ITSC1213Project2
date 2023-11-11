@@ -8,4 +8,9 @@ public class Wood extends Resource{
         super("wood");
         super.add(amount);
     }
+
+    @Override
+    public int scoreImpact(){
+        return 2 * getQuantity();
+    }
 }

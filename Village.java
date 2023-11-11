@@ -9,6 +9,8 @@ public class Village extends Generator{
 
     public static ArrayList<Resource> levelThreeContructionCost = new ArrayList<Resource>(Arrays.asList(new Gold(1000), new Stone(500), new Wood(500)));
 
+    public static String description = "The village generates gold every round and allows you to revive every 10 rounds";
+
 
     Village(){
         super("village", contructionCost, levelTwoContructionCost, levelThreeContructionCost, 30, 1, new Gold(1), 1);
@@ -49,7 +51,12 @@ public class Village extends Generator{
                 this.setResourceProductionRate(200);
             } else System.out.println("Not enough resources to upgrade");
         }
-        else System.out.println("Generator at max level");
+        else System.out.println("no more upgrades can be done");
+    }
+
+    @Override
+    public void printDescription(){
+        System.out.println(description);
     }
 
     @Override

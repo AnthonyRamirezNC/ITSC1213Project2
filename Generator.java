@@ -5,7 +5,7 @@ import java.util.Arrays;
  * The Generator class represents a generic resource generating item in the game.
  * Generators have a name, a construction cost, and a resource production rate.
  */
-abstract class Generator {
+abstract class Generator implements Comparable<Generator>, Score{
     private String name;
     private ArrayList<Resource> constructionCost;
 
@@ -19,6 +19,7 @@ abstract class Generator {
     private Resource product;
 
     public int currentLevel;
+
 
     /**
      * Creates a new Generator with the given name, construction cost, and resource production rate.
@@ -108,4 +109,21 @@ abstract class Generator {
     }
 
     public Resource getProduct(){return this.product;}
+
+    @Override
+    public int compareTo(Generator generator){
+        if(this.currentLevel > generator.currentLevel){
+            return 1;
+        }else if(this.currentLevel < generator.currentLevel){
+            return -1;
+        } else return 0;
+    }
+
+    public int scoreImpact(){
+        return 500;
+    }
+
+    public void printDescription(){
+        System.out.println("Generic generator description printing");
+    }
 }
