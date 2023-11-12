@@ -88,7 +88,19 @@ public class Helper {
         System.out.println("Gold Gained: +" + goldScore + " points");
         System.out.println("Wood Gained: +" + woodScore + " points");
         System.out.println("Stone Gained: +" + stoneScore + " points");
-        System.out.println("Events Survived: " + eventScore + "points");
+        System.out.println("Events Survived: +" + eventScore + " points");
         System.out.println("Final Score: " + (roundScore + generatorScore + goldScore + woodScore + stoneScore) + " points");
+    }
+
+    public static boolean isInteger(String checkStr){
+        if(checkStr == null){
+            return false;
+        }
+        try{
+            int check = Integer.parseInt(checkStr);
+        } catch (NumberFormatException nfe){
+            return false;
+        }
+        return true;
     }
 }

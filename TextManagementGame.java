@@ -9,9 +9,10 @@ public class TextManagementGame {
     private ArrayList<Resource> resources = new ArrayList<Resource>(Arrays.asList(new Gold(0), new Wood(0), new Stone(0)));
     private ArrayList<Generator> generators = new ArrayList<Generator>();
 
-    private ArrayList<Event> events = new ArrayList<Event>(Arrays.asList(new StrikeEvent(), new DestroyGeneratorEvent(), new MisplacedResourcesEvent()));
+    private ArrayList<Event> events = new ArrayList<Event>(Arrays.asList(new StrikeEvent(), new DestroyGeneratorEvent(), new MisplacedResourcesEvent(), new ResourceDiscoveryEvent(), new TechnologicalBreakthroughEvent()));
 
-    public int oddsOfRandomEvent = 4; //ex: 0 = disable events, 1 = always have events, 4 = 25% chance
+
+    public int oddsOfRandomEvent = 1; //ex: 0 = disable events, 1 = always have events, 4 = 25% chance
 
     public int villCount = 0;
 
@@ -20,6 +21,10 @@ public class TextManagementGame {
     public static boolean ableToCollect = true;
 
     public static boolean breakout = false;
+
+    public static int cheatRound = 1;
+
+    public static int amountToStartWith = 100;
 
     // Define a Scanner for user input
     private Scanner scanner = new Scanner(System.in);
@@ -140,7 +145,7 @@ public class TextManagementGame {
         System.out.println("Welcome to the Text Management Game!"); //TODO: Change Text
         System.out.println("Your goal is to build a thriving city! You will start with 500 gold, when you run out of gold, you lose");
         //give starting resources
-        resources.get(0).add(500);
+        resources.get(0).add(amountToStartWith);
 
         // Main game loop
         while (!isCriticalResourceEmpty() || isRevivable()) {
@@ -155,7 +160,14 @@ public class TextManagementGame {
             System.out.println("7. Cheats");
             System.out.println("8. Quit Game");
             System.out.print("Choose an Option: ");
-            int choice = scanner.nextInt();
+            String choiceStr = scanner.nextLine();
+            int choice = 0;
+            if(Helper.isInteger(choiceStr)){
+                choice = Integer.parseInt(choiceStr);
+            } else if(!Helper.isInteger(choiceStr)){
+                System.out.println("Invalid Choice in main menu");
+                continue;
+            }
 
             switch (choice) {
                 case 1:
@@ -241,92 +253,96 @@ public class TextManagementGame {
         System.out.println(Village.description);
         System.out.println("3. Lumberjacks");
         System.out.println(Lumberjacks.description);
-        int choice = scanner.nextInt();
-        boolean canCraft = false;
-                switch(choice){
-            case 1:
-                System.out.println("This requires the following Resources:");
-                for(Resource resource : Mine.contructionCost){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-
-                System.out.println("You have the following Resources:");
-                for(Resource resource : resources){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-
-                canCraft = Helper.canConstruct(Mine.contructionCost, resources);
-                if(canCraft){
-                    System.out.println("Would you like to continue? (Y or N)");
-                    scanner.nextLine();
-                    String craftChoice = scanner.nextLine();
-                    if(craftChoice.toLowerCase().equals("y")) {
-                        //remove required resources and add generator
-                        Helper.consumeConstructionCosts(Mine.contructionCost, resources);
-                        addGenerator(new Mine());
-                        System.out.println("You have created a Mine!");
+        String choiceStr = scanner.nextLine();
+        if(Helper.isInteger(choiceStr)){
+            boolean canCraft = false;
+            int choice = Integer.parseInt(choiceStr);
+            switch(choice){
+                case 1:
+                    System.out.println("This requires the following Resources:");
+                    for(Resource resource : Mine.contructionCost){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
                     }
-                }
-                else{
-                    System.out.println("You do not have enough resources to create a Mine!");
-                }
-                break;
 
-            case 2:
-                System.out.println("This requires the following Resources:");
-                for(Resource resource : Village.contructionCost){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-
-                System.out.println("You have the following Resources:");
-                for(Resource resource : resources){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-                //check if construction costs are met
-                canCraft = Helper.canConstruct(Village.contructionCost, resources);
-                if(canCraft){
-                    System.out.println("Would you like to continue? (Y or N)");
-                    scanner.nextLine();
-                    String craftChoice = scanner.nextLine();
-                    if(craftChoice.toLowerCase().equals("y")) {
-                        //remove required resources and add generator
-                        Helper.consumeConstructionCosts(Village.contructionCost, resources);
-                        addGenerator(new Village());
-                        System.out.println("You have created a Village!");
+                    System.out.println("You have the following Resources:");
+                    for(Resource resource : resources){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
                     }
-                }
-                else{
-                    System.out.println("You do not have enough resources to create a Village!");
-                }
-                break;
 
-            case 3:
-                System.out.println("This requires the following Resources:");
-                for(Resource resource : Lumberjacks.contructionCost){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-
-                System.out.println("You have the following Resources:");
-                for(Resource resource : resources){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-                //check if construction costs are met
-                canCraft = Helper.canConstruct(Lumberjacks.contructionCost, resources);
-                if(canCraft){
-                    System.out.println("Would you like to continue? (Y or N)");
-                    scanner.nextLine();
-                    String craftChoice = scanner.nextLine();
-                    if(craftChoice.toLowerCase().equals("y")) {
-                        //remove required resources and add generator
-                        Helper.consumeConstructionCosts(Lumberjacks.contructionCost, resources);
-                        addGenerator(new Lumberjacks());
-                        System.out.println("You have hired Lumberjacks!");
+                    canCraft = Helper.canConstruct(Mine.contructionCost, resources);
+                    if(canCraft){
+                        System.out.print("Would you like to continue? (Y or N): ");
+                        String craftChoice = scanner.nextLine();
+                        if(craftChoice.toLowerCase().equals("y")) {
+                            //remove required resources and add generator
+                            Helper.consumeConstructionCosts(Mine.contructionCost, resources);
+                            addGenerator(new Mine());
+                            System.out.println("You have created a Mine!");
+                        } else System.out.println("You selected N or made an invalid choice");
                     }
-                }
-                else{
-                    System.out.println("You do not have enough resources to hire Lumberjacks!");
-                }
-                break;
+                    else{
+                        System.out.println("You do not have enough resources to create a Mine!");
+                    }
+                    break;
+
+                case 2:
+                    System.out.println("This requires the following Resources:");
+                    for(Resource resource : Village.contructionCost){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
+                    }
+
+                    System.out.println("You have the following Resources:");
+                    for(Resource resource : resources){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
+                    }
+                    //check if construction costs are met
+                    canCraft = Helper.canConstruct(Village.contructionCost, resources);
+                    if(canCraft){
+                        System.out.println("Would you like to continue? (Y or N)");
+                        scanner.nextLine();
+                        String craftChoice = scanner.nextLine();
+                        if(craftChoice.toLowerCase().equals("y")) {
+                            //remove required resources and add generator
+                            Helper.consumeConstructionCosts(Village.contructionCost, resources);
+                            addGenerator(new Village());
+                            System.out.println("You have created a Village!");
+                        }
+                    }
+                    else{
+                        System.out.println("You do not have enough resources to create a Village!");
+                    }
+                    break;
+
+                case 3:
+                    System.out.println("This requires the following Resources:");
+                    for(Resource resource : Lumberjacks.contructionCost){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
+                    }
+
+                    System.out.println("You have the following Resources:");
+                    for(Resource resource : resources){
+                        System.out.println(resource.getName()+ ": " + resource.getQuantity());
+                    }
+                    //check if construction costs are met
+                    canCraft = Helper.canConstruct(Lumberjacks.contructionCost, resources);
+                    if(canCraft){
+                        System.out.println("Would you like to continue? (Y or N)");
+                        scanner.nextLine();
+                        String craftChoice = scanner.nextLine();
+                        if(craftChoice.toLowerCase().equals("y")) {
+                            //remove required resources and add generator
+                            Helper.consumeConstructionCosts(Lumberjacks.contructionCost, resources);
+                            addGenerator(new Lumberjacks());
+                            System.out.println("You have hired Lumberjacks!");
+                        }
+                    }
+                    else{
+                        System.out.println("You do not have enough resources to hire Lumberjacks!");
+                    }
+                    break;
+            }
+        } else if(!(Helper.isInteger(choiceStr))){
+            System.out.println("Invalid selection but be integer");
         }
     }
     /**
@@ -342,27 +358,30 @@ public class TextManagementGame {
             System.out.println((i+1) + ".) " + generators.get(i).toString());
         }
         System.out.println("Which generators would you like to upgrade?");
-        int choice = scanner.nextInt();
-        if(choice <= generators.size()){
-            ArrayList<Resource> upgradeCost = generators.get(choice - 1).getUpgradeCost();
-            if(upgradeCost.size() > 0){
-                System.out.println("This requires the following Resources:");
-                for(Resource resource : upgradeCost){
-                    System.out.println(resource.getName()+ ": " + resource.getQuantity());
-                }
-                System.out.println("\nYou have the following resources:");
-                viewResources();
+        String genUpgradeChoiceStr = scanner.nextLine();
+        if(Helper.isInteger(genUpgradeChoiceStr)) {
+            int choice = Integer.parseInt(genUpgradeChoiceStr);
+            if (choice <= generators.size()) {
+                ArrayList<Resource> upgradeCost = generators.get(choice - 1).getUpgradeCost();
+                if (upgradeCost.size() > 0) {
+                    System.out.println("This requires the following Resources:");
+                    for (Resource resource : upgradeCost) {
+                        System.out.println(resource.getName() + ": " + resource.getQuantity());
+                    }
+                    System.out.println("\nYou have the following resources:");
+                    viewResources();
 
-                System.out.println("Would you like to continue? (Y or N)");
-                //flush buffer
-                scanner.nextLine();
-                String doContinue = scanner.nextLine();
-                if(doContinue.toLowerCase().equals("y")){
-                    System.out.println("upgrading generator");
-                    generators.get(choice - 1).upgrade(resources);
-                } else System.out.println("Generator not upgraded");
-            }
-        }else System.out.println("Invalid Choice");
+                    System.out.println("Would you like to continue? (Y or N)");
+                    String doContinue = scanner.nextLine();
+                    if (doContinue.toLowerCase().equals("y")) {
+                        System.out.println("upgrading generator");
+                        generators.get(choice - 1).upgrade(resources);
+                    } else System.out.println("Generator not upgraded");
+                }
+            } else System.out.println("Invalid Choice");
+        }else if(!(Helper.isInteger(genUpgradeChoiceStr))){
+            System.out.println("Invalid choice must be integer");
+        }
     }
 
     /**
@@ -375,35 +394,45 @@ public class TextManagementGame {
         System.out.println("Which Resource do you want to sell?");
         System.out.println("1.) Wood (10 Gold Per)");
         System.out.println("2.) Stone (20 Gold Per)");
-        int choice = scanner.nextInt();
-        System.out.println("How much do you want to sell?");
-        int sellAmount = scanner.nextInt();
-        if(choice == 1){
-            if(sellAmount <= resources.get(1).getQuantity()) {
-                goldToAdd = sellAmount * 10;
-                resources.get(0).add(goldToAdd);
-                resources.get(choice).consume(sellAmount);
-                System.out.println("You sold " + sellAmount + " Wood for " + goldToAdd + " gold.");
-            }else System.out.println("Not enough resources to sell");
+        String choiceStr = scanner.nextLine();
+        if(Helper.isInteger(choiceStr)) {
+            int choice = Integer.parseInt(choiceStr);
+            System.out.println("How much do you want to sell?");
+            String sellAmountStr = scanner.nextLine();
+            if(Helper.isInteger(sellAmountStr)) {
+                int sellAmount = Integer.parseInt(sellAmountStr);
+                if (choice == 1) {
+                    if (sellAmount <= resources.get(1).getQuantity()) {
+                        goldToAdd = sellAmount * 10;
+                        resources.get(0).add(goldToAdd);
+                        resources.get(choice).consume(sellAmount);
+                        System.out.println("You sold " + sellAmount + " Wood for " + goldToAdd + " gold.");
+                    } else System.out.println("Not enough resources to sell");
 
-        }else if(choice ==2){
-            if(sellAmount <= resources.get(2).getQuantity()) {
-                goldToAdd = sellAmount * 20;
-                resources.get(0).add(goldToAdd);
-                resources.get(choice).consume(sellAmount);
-                System.out.println("You sold " + sellAmount + " Stone for " + goldToAdd + " gold.");
-            }else System.out.println("Not enough resources to sell");
-        }else System.out.println("Invalid Choice");
+                } else if (choice == 2) {
+                    if (sellAmount <= resources.get(2).getQuantity()) {
+                        goldToAdd = sellAmount * 20;
+                        resources.get(0).add(goldToAdd);
+                        resources.get(choice).consume(sellAmount);
+                        System.out.println("You sold " + sellAmount + " Stone for " + goldToAdd + " gold.");
+                    } else System.out.println("Not enough resources to sell");
+                } else System.out.println("Invalid Choice");
+            } else if(!(Helper.isInteger(sellAmountStr))){
+                System.out.println("Invalid choice must be an integer");
+            }
+        } else if(!(Helper.isInteger(choiceStr))){
+            System.out.println("Invalid choice must be an integer");
+        }
     }
 
     /**
-     * Open cheat menu ONLY AVAILABLE AFTER ROUND 15
+     * Open cheat menu ONLY AVAILABLE AFTER ROUND 15 by default
      */
     public void cheatMenu(){
         System.out.println("\nopening cheat menu");
         System.out.println("Round: " + round);
         while(breakout != true){
-            if (round >= 15) {
+            if (round >= TextManagementGame.cheatRound) {
                 System.out.println("Welcome to the cheat menu, what would you like to do?");
                 System.out.println("1. Change Round");
                 System.out.println("2. Add Resources");
@@ -412,24 +441,62 @@ public class TextManagementGame {
                 System.out.println("5. Set Event Chance");
                 System.out.println("6. Set Revivable");
                 System.out.println("7. Exit Cheat Menu");
-                int choice = scanner.nextInt();
+                String choiceStr = scanner.nextLine();
+                int choice = 7;
+                if(Helper.isInteger(choiceStr)){
+                    choice = Integer.parseInt(choiceStr);
+                } else if(!Helper.isInteger(choiceStr)){
+                    System.out.println("Invalid Choice in cheat menu");
+                }
                 switch (choice) {
                     case 1:
                         System.out.println("What round would you like to go to?");
                         System.out.println("Current Round:" + round);
                         System.out.print("New Round: ");
-                        int newRound = scanner.nextInt();
+                        String roundStr = scanner.nextLine();
+                        int newRound = round;
+                        if(Helper.isInteger(roundStr)){
+                            newRound = Integer.parseInt(roundStr);
+                        } else if(!Helper.isInteger(roundStr)){
+                            System.out.println("Invalid Choice, round must be an integer");
+                        }
                         round = newRound;
                         break;
                     case 2:
                         System.out.println("Current Resources:");
                         viewResources();
-                        System.out.println("How much gold: ");
-                        int newGold = scanner.nextInt();
-                        System.out.println("How much stone: ");
-                        int newStone = scanner.nextInt();
-                        System.out.println("How much wood: ");
-                        int newWood = scanner.nextInt();
+                        int newGold = 0;
+                        int newWood = 0;
+                        int newStone = 0;
+                        System.out.print("How much gold: ");
+                        String newGoldStr = scanner.nextLine();
+                        //check for proper input
+                        if(Helper.isInteger(newGoldStr)){
+                             newGold = Integer.parseInt(newGoldStr);
+                        } else if(!Helper.isInteger(newGoldStr)){
+                            System.out.println("Invalid Choice, must be an integer");
+                            break;
+                        }
+
+
+                        System.out.print("How much stone: ");
+                        String newStoneStr = scanner.nextLine();
+                        if(Helper.isInteger(newStoneStr)){
+                            newStone = Integer.parseInt(newStoneStr);
+                        } else if(!Helper.isInteger(newStoneStr)){
+                            System.out.println("Invalid Choice, must be an integer");
+                            break;
+                        }
+
+                        System.out.print("How much wood: ");
+                        String newWoodStr = scanner.nextLine();
+                        if(Helper.isInteger(newWoodStr)){
+                            newWood = Integer.parseInt(newWoodStr);
+                        } else if(!Helper.isInteger(newWoodStr)){
+                            System.out.println("Invalid Choice, must be an integer");
+                            break;
+                        }
+
                         ArrayList<Resource> resourcesToAdd = new ArrayList<Resource>(Arrays.asList(new Gold(newGold), new Stone(newStone), new Wood(newWood)));
                         Helper.addToExistingResources(resources, resourcesToAdd);
                         System.out.println("New Current Resources:");
@@ -437,53 +504,77 @@ public class TextManagementGame {
                         break;
                     case 3:
                         viewGenerators();
-                        System.out.println("Which Generator would you like to spawn?");
                         System.out.println("1.) Mine");
                         System.out.println(Mine.description);
                         System.out.println("2.) Village");
                         System.out.println(Village.description);
                         System.out.println("3.) Lumberjacks");
                         System.out.println(Lumberjacks.description);
-                        int genChoice = scanner.nextInt();
-                        switch(genChoice){
-                            case 1:
-                                generators.add(new Mine());
-                                System.out.println("Mine added");
-                                break;
-                            case 2:
-                                generators.add(new Village());
-                                System.out.println("Village added");
-                                break;
-                            case 3:
-                                generators.add(new Lumberjacks());
-                                System.out.println("Lumberjacks added");
-                                break;
-                            default:
-                                System.out.println("Invalid choice");
-                                break;
+                        System.out.print("Which Generator would you like to spawn: ");
+                        String genChoiceStr = scanner.nextLine();
+                        if(Helper.isInteger(genChoiceStr)){
+                            int genChoice = Integer.parseInt(genChoiceStr);
+                            switch(genChoice){
+                                case 1:
+                                    generators.add(new Mine());
+                                    System.out.println("Mine added");
+                                    break;
+                                case 2:
+                                    generators.add(new Village());
+                                    System.out.println("Village added");
+                                    break;
+                                case 3:
+                                    generators.add(new Lumberjacks());
+                                    System.out.println("Lumberjacks added");
+                                    break;
+                                default:
+                                    System.out.println("Invalid choice must select one of the generators");
+                                    break;
+                            }
+                            break;
+                        } else if(!Helper.isInteger(genChoiceStr)){
+                            System.out.println("Invalid Choice, must be an integer");
+                            break;
                         }
-                        break;
+
                     case 4:
                         //display current generators
-                        System.out.println("Current Generators:");
-                        for(int i = 0; i < generators.size(); i++){
-                            System.out.println((i+1) + ".) " + generators.get(i).toString());
+                        if(generators.size() > 0) {
+                            System.out.println("Current Generators:");
+                            for (int i = 0; i < generators.size(); i++) {
+                                System.out.println((i + 1) + ".) " + generators.get(i).toString());
+                            }
+                        } else{
+                            System.out.println("No generators to upgrade");
+                            break;
                         }
                         System.out.println("Which generators would you like to upgrade?");
-                        int genUpgradeChoice = scanner.nextInt();
-                        if(genUpgradeChoice <= generators.size()) {
-                            //upgrade using arraylist with infinite resources
-                            generators.get(genUpgradeChoice - 1).upgrade(new ArrayList<Resource>(Arrays.asList(new Gold(999999), new Stone(999999), new Wood(999999))));
-                            if(generators.get(genUpgradeChoice - 1).currentLevel <3) {
-                                System.out.println(generators.get(genUpgradeChoice - 1).getName() + " upgraded to level " + generators.get(genUpgradeChoice - 1).getCurrentLevel());
-                            }
-                        }else System.out.println("Invalid Choice");
-                        break;
+                        String genUpgradeChoiceStr = scanner.nextLine();
+                        if(Helper.isInteger(genUpgradeChoiceStr)) {
+                            int genUpgradeChoice = Integer.parseInt(genUpgradeChoiceStr);
+                            if(genUpgradeChoice <= generators.size()) {
+                                //upgrade using arraylist with infinite resources
+                                generators.get(genUpgradeChoice - 1).upgrade(new ArrayList<Resource>(Arrays.asList(new Gold(999999), new Stone(999999), new Wood(999999))));
+                                if(generators.get(genUpgradeChoice - 1).currentLevel <3) {
+                                    System.out.println(generators.get(genUpgradeChoice - 1).getName() + " upgraded to level " + generators.get(genUpgradeChoice - 1).getCurrentLevel());
+                                }
+                            }else System.out.println("Invalid Choice");
+                            break;
+                        } else if(!Helper.isInteger(genUpgradeChoiceStr)) {
+                            System.out.println("Invalid Choice, must be an integer");
+                            break;
+                        }
                     case 5:
                         System.out.println("Current event chance: " + oddsOfRandomEvent + " (ex: 0 = disable events, 1 = always have events, 4 = 25% chance)");
-                        System.out.println("New event Chance: ");
-                        this.oddsOfRandomEvent = scanner.nextInt();
-                        break;
+                        System.out.print("New event Chance: ");
+                        String newOddsStr = scanner.nextLine();
+                        if(Helper.isInteger(newOddsStr)){
+                            this.oddsOfRandomEvent = Integer.parseInt(newOddsStr);
+                            break;
+                        } else if(!(Helper.isInteger(newOddsStr))){
+                            System.out.println("Invalid choice, must be an integer");
+                            break;
+                        }
                     case 6:
                         if(!isRevivable()){
                             revivable = true;
@@ -498,7 +589,7 @@ public class TextManagementGame {
                 }
             }
             else {
-                System.out.println("Cheat Menu unlocks at round 15");
+                System.out.println("Cheat Menu unlocks at round " + TextManagementGame.cheatRound);
                 breakout = true;
             }
         }
